@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from Database.DataBaseInterface import DataBaseInterface
+from Agent.agent import Agent
 
 app = FastAPI(title = "LapAgent Backend",version="0.1.0")
 app.add_middleware(
@@ -11,14 +12,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 db=DataBaseInterface()
+agent=Agent()
 
+#=========Area for Address Functions=========//
 @app.get("/")
 async def root():
     return {"message": "Hello World\n"}
-
 @app.post("/receive_message")
 async def receive_message(request: dict):
     user_message = request.get("message")
     #print(f"Received message: {user_message}")
     db.store(user_message)
     return {"reply":user_message}
+@app.post("/set_api_key")
+async def set_api_key(request: dict):
+    #print(f"Received API key: {request.get('message')}")
+    api_key = request.get("message")
+    agent.set_API_key(api_key)
+    return {"message": "API key set successfully"}
+@app.get("/get_model_list")
+async def get_able_models():
+    model_list = agent.get_model_list()
+    return {"models": model_list}
+@app.post("/set_model")
+async def set_model(request: dict):
+    model = request.get("message")
+    agent.set_model(model)
+    return {"message": "Model set successfully"}

@@ -7,6 +7,18 @@
 </head>
 <body>
     <h1>LapAgent</h1>
+    <!--  The AI Configurationb Area    -->
+    <button id ="SetAPIKeyButton">Set Your API Here</button>
+    <input type="text" id="apiKeyInput" placeholder="Enter your API key here" hidden=1>
+    <select id="BaseSelect" hidden="1">
+        <option value="Qwen">Qwen</option>
+        <option value="openai">OpenAI</option>
+        <option value="local">Local Model</option>
+    </select>
+    <select id="ModelSelect" hidden="1">
+    </select>
+    <!--  The AI Configurationb Area    -->
+
     <p>Click the button to get started. </p>
     <button id="startButton">Start</button>
     <input type="text" id="userInput" placeholder="Enter your input here">
