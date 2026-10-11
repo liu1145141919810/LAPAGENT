@@ -1,5 +1,8 @@
-note.md
 .vscode
 trash.txt
 statistic.sh
 *.db
+*.pyc
+*.key
+test_bin/*
+note_book/*
