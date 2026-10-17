@@ -31,9 +31,10 @@ class Agent:
                 base_url=base_url_dict.get(self.api_model, "https://api.openai.com/v1")
                 )
 
-            with open(os.path.join(_current_dir, '..', 'public', 'public_configuration.ini'), 'w') as configfile:
+            with open(os.path.join(_current_dir, '..', 'public', 'public_config.ini'), 'w') as configfile:
                 cfg.set('AIAgent', 'api_key', encrypted_key)
                 cfg.write(configfile)
+                print(f"API key has been set and saved successfully. {api_key}")
         except Exception as e:
             print(f"Error occurred for the provided API key: {e}")
     def set_model(self, model):
