@@ -4,16 +4,12 @@ import os
 import configparser
 
 from Crypto.cryptography import Crypto
+from Agent import base_url_dict
 
 _current_dir = os.path.dirname(os.path.abspath(__file__))
-_config_path = os.path.join(_current_dir, '..', 'public', 'public_configuration.ini')
+_config_path = os.path.join(_current_dir, '..', 'public', 'public_config.ini')
 cfg = configparser.ConfigParser()
 cfg.read(_config_path)
-
-# The space for model base_url
-base_url=[
-    "https://dashscope.aliyuncs.com/compatible-mode/v1",# Qwen
-]
 
 class Agent:
     def __init__(self):
@@ -32,8 +28,9 @@ class Agent:
             encrypted_key = self.crypto.encode(api_key)
             self.client = OpenAI(
                 api_key=api_key, 
-                base_url=base_url[int(self.api_model)])
-            
+                base_url=base_url_dict.get(self.api_model, "https://api.openai.com/v1")
+                )
+
             with open(os.path.join(_current_dir, '..', 'public', 'public_configuration.ini'), 'w') as configfile:
                 cfg.set('AIAgent', 'api_key', encrypted_key)
                 cfg.write(configfile)
@@ -50,13 +47,15 @@ class Agent:
                 model=self.api_model,
                 messages=[
                     {"role": "system", "content": "你是一个有帮助的 AI 助手。"},
-                    {"role": "user", "content": "请介绍一下 Python。"}
-                ] 
+                    {"role": "user", "content": str(msg)}
+                ]
             )
             answer = response.choices[0].message.content
             print(f"AI Assistant: {answer}")
+            return answer
         except Exception as e:
             print(f"Error during interaction: {e}")
+            return f"Error: {str(e)}"
     def get_model_list(self):
         try:
             models = self.client.models.list()

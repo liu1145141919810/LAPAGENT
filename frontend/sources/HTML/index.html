@@ -11,9 +11,6 @@
     <button id ="SetAPIKeyButton">Set Your API Here</button>
     <input type="text" id="apiKeyInput" placeholder="Enter your API key here" hidden=1>
     <select id="BaseSelect" hidden="1">
-        <option value="Qwen">Qwen</option>
-        <option value="openai">OpenAI</option>
-        <option value="local">Local Model</option>
     </select>
     <select id="ModelSelect" hidden="1">
     </select>
@@ -21,8 +18,10 @@
 
     <p>Click the button to get started. </p>
     <button id="startButton">Start</button>
-    <input type="text" id="userInput" placeholder="Enter your input here">
+    <input type="text" id="userInput" placeholder="Enter your input here" hidden="1">
     <p id="feedback"></p>
+    <img src="../../asset/deepseek2.jpeg" alt="Agent Image" width="200" id="agentImage">
+    <textarea id="messageInput" placeholder="Waiting for feedback" rows="4" readonly></textarea>
 
     <script src="../JavaScript/script.js"></script>
 </body>

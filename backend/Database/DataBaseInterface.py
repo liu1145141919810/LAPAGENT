@@ -1,4 +1,6 @@
 import sqlite3
+from sqlalchemy import create_engine, Column, Integer, String, DateTime,ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
 
 from datetime import datetime
 import configparser
@@ -12,6 +14,33 @@ cfg = configparser.ConfigParser()
 cfg.read(_config_path)
 
 # One dp_path file for one DataBase Class
+#========== Following is the definition of different DataBase Themselves==============#
+Base = declarative_base()
+class Roles(Base):
+    __tablename__ = "roles"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+class Conversation(Base):
+    __tablename__ = "conversations"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    AI_name = Column(String, nullable=False)
+    # It's the created time of conversation
+    timestamp = Column(DateTime, default=datetime.now)
+class Messages(Base):
+    __tablename__ = "messages"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    message = Column(String, nullable=False)
+    conversation_id = Column(
+        Integer,
+        ForeignKey('conversations.id'), 
+        nullable=False)
+    role_id = Column(
+        Integer,
+        ForeignKey('roles.id'), 
+        nullable=False)
+    # It's the created time of message
+    timestamp = Column(DateTime, default=datetime.now)
+#========== The Public DataBase Interface for all ====================================#
 class DataBaseInterface:
     def __init__(self,dp_path=None):
         # load the db file here

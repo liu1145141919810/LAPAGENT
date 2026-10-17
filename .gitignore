@@ -6,3 +6,4 @@ statistic.sh
 *.key
 test_bin/*
 note_book/*
+*.ini

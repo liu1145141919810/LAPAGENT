@@ -4,7 +4,7 @@ import os
 import configparser
 
 _current_dir = os.path.dirname(os.path.abspath(__file__))
-_config_path = os.path.join(_current_dir, '..', 'public', 'public_configuration.ini')
+_config_path = os.path.join(_current_dir, '..', 'public', 'public_config.ini')
 cfg = configparser.ConfigParser()
 cfg.read(_config_path)
 
