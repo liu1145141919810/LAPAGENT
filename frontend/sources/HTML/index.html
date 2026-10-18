@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LapAgent</title>
+    <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body>
     <h1>LapAgent</h1>
+    <img src="../../asset/deepseek2.jpeg" alt="Agent Image" width="200" id="agentImage">
+    <br>
     <!--  The AI Configurationb Area    -->
-    <button id ="SetAPIKeyButton">Set Your API Here</button>
+    <button id="SetAPIKeyButton" class="btn-default">Set Your API Here</button>
     <input type="text" id="apiKeyInput" placeholder="Enter your API key here" hidden=1>
     <select id="BaseSelect" hidden="1">
     </select>
@@ -17,12 +20,25 @@
     <!--  The AI Configurationb Area    -->
 
     <p>Click the button to get started. </p>
-    <button id="startButton">Start</button>
+    <button id="optionButton" class="btn-primary" disabled>Option for Conversation</button>
+
+    <div>
+    <button id="startButton" class="btn-default">Start</button>
+    <button id="loadButton" class="btn-default">Load</button>
+    <select id="historySelect" hidden="1">
+        <optgroup label="History"></optgroup>
+    </select>
+    </div>
+
+    <br>
     <input type="text" id="userInput" placeholder="Enter your input here" hidden="1">
     <p id="feedback"></p>
-    <img src="../../asset/deepseek2.jpeg" alt="Agent Image" width="200" id="agentImage">
-    <textarea id="messageInput" placeholder="Waiting for feedback" rows="4" readonly></textarea>
+    
+    <div id="messageInput" class="chat-box" hidden ="1">
+    <div class="msg system">Waiting for feedback...</div>
+    </div>
 
-    <script src="../JavaScript/script.js"></script>
+    <script type="module" src="../JavaScript/APISelect.js"></script>
+    <script type = "module" src="../JavaScript/Conversation.js"></script>
 </body>
 </html>

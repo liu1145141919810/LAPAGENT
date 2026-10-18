@@ -1,9 +1,6 @@
-const baseAssetPath = '../../asset/';
+import { sendMessage } from './public_usage.js';
 
-const button = document.getElementById('startButton');
-const feedback = document.getElementById('feedback');
-const Userinput = document.getElementById('userInput');
-const messageInput = document.getElementById('messageInput');
+const baseAssetPath = '../../asset/';
 
 const setAPIKeyButton = document.getElementById('SetAPIKeyButton');
 const apiKeyInput = document.getElementById('apiKeyInput');
@@ -11,38 +8,11 @@ const BaseSelect = document.getElementById('BaseSelect');
 const ModelSelect = document.getElementById('ModelSelect');
 const agentImage = document.getElementById('agentImage');
 
-async function sendMessage(userMessage,address){
-    const response = await fetch(address, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message: userMessage })
-    });
-    const ResponseData = await response.json();
-    backinfo = ResponseData.reply;
-    //else console.log('Message sent successfully');
-    return backinfo;
-    }
+let option=null;
 
-button.addEventListener('click', async () => {
-    //console.log('Button clicked');
-    feedback.textContent = 'Waiting...';
-    Userinput.hidden = false;
-    try {
-        const response = await fetch("http://localhost:8000");
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        feedback.textContent = data.message;
-    } catch (e) {
-        feedback.textContent = 'Error occurred.';
-    }
-});
-
-//=======Selecting Model=============//
-option=null;
+function optionReader(){
+    return option;
+}
 setAPIKeyButton.addEventListener('click', () => {
     setAPIKeyButton.hidden = !setAPIKeyButton.hidden;
     BaseSelect.hidden = !BaseSelect.hidden;
@@ -120,14 +90,5 @@ ModelSelect.addEventListener('change', () => {
     setAPIKeyButton.hidden = !setAPIKeyButton.hidden;
     sendMessage(ModelSelect.value,"http://localhost:8000/set_model");
 })
-    //============================//
-//=========Selecting Model================//
 
-Userinput.addEventListener('keydown', async (e) => {
-    if (e.key === 'Enter') {
-        const userInput = Userinput.value;
-        const reply = await sendMessage(userInput, "http://localhost:8000/receive_message");
-        messageInput.value = reply;
-        Userinput.value = '';
-    }
-});
+export default optionReader;

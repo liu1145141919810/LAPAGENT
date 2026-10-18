@@ -12,6 +12,10 @@
 
 ### 0.0.3 Add in the cryptography security,realize mini AI-API connection
 
-### 0.0.4 
+### 0.0.4 Fix the problem of API leakage, optimize the database
+
+### 0.0.5 Work for conservation administration
+
+### 0.0.6 Fix the existing bug, complete the basic conversation functions
 
 crpyography would deal ** dialogue data(DB) ** in database and ** API_KEY(AI) ** in .ini

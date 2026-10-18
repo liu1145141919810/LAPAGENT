@@ -4,7 +4,7 @@ import os
 import configparser
 
 from Crypto.cryptography import Crypto
-from Agent import base_url_dict
+from public.AI_configure import base_url_dict
 
 _current_dir = os.path.dirname(os.path.abspath(__file__))
 _config_path = os.path.join(_current_dir, '..', 'public', 'public_config.ini')
@@ -18,6 +18,8 @@ class Agent:
         try:
             api_key = cfg.get('AIAgent', 'api_key')
             api_key = self.crypto.decode(api_key)
+            api_model = cfg.get('AIAgent', 'api_model')
+            self.api_model = self.crypto.decode(api_model)
             self.client = OpenAI(api_key=api_key)
         except Exception as e:
             pass
@@ -34,13 +36,17 @@ class Agent:
             with open(os.path.join(_current_dir, '..', 'public', 'public_config.ini'), 'w') as configfile:
                 cfg.set('AIAgent', 'api_key', encrypted_key)
                 cfg.write(configfile)
-                print(f"API key has been set and saved successfully. {api_key}")
+                print(f"API key has been set and saved successfully")
         except Exception as e:
             print(f"Error occurred for the provided API key: {e}")
     def set_model(self, model):
         self.api_model = model
+        model = self.crypto.encode(model)
+        with open(os.path.join(_current_dir, '..', 'public', 'public_config.ini'), 'w') as configfile:
+            cfg.set('AIAgent', 'api_model', model)
+            cfg.write(configfile)
+            print(f"Model has been set to {self.api_model} and saved successfully")
         # have a brief try here
-        self.interact()
     def interact(self,msg=None):
         try:
             response = self.client.chat.completions.create(
