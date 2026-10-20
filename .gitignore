@@ -7,3 +7,5 @@ statistic.sh
 test_bin/*
 note_book/*
 *.ini
+*.txt
+backend/public/logs/*

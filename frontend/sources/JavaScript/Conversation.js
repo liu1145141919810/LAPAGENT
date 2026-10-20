@@ -5,8 +5,10 @@ const Startbutton = document.getElementById('startButton');
 const Loadbutton = document.getElementById('loadButton');
 const HistorySelect = document.getElementById('historySelect');
 
-const Userinput = document.getElementById('userInput');
+let Userinput = document.getElementById('userInput');
 const chatBox = document.getElementById("messageInput");
+const chatContainer =document.getElementById("messagesContainer");
+const closeChatButton = document.getElementById("closeChatButton");
 let conversation_id = 0;
 
 Startbutton.addEventListener('click', async () => {
@@ -55,7 +57,9 @@ HistorySelect.addEventListener('change', async () => {
     conversation_id = choosenConversationId; // Update the global conversation_id variable 
 
     const data = await sendMessage(choosenConversationId, "http://localhost:8000/load_conversation");
-    chatBox.innerHTML = '';
+    
+    chatContainer.innerHTML = ''; // Clear previous messages
+
     for (const msg of data){
         const role_name = await sendMessage(msg.role_id, "http://localhost:8000/check_role_name");
         if (role_name == "user")
@@ -66,7 +70,10 @@ HistorySelect.addEventListener('change', async () => {
 })
 
 Userinput.addEventListener('keydown', async (e) => {
-    if (e.key === 'Enter') {
+    InputKeydownHandler(e);
+});
+async function  InputKeydownHandler(e) {
+       if (e.key === 'Enter') {
         console.log('Enter key pressed. Sending message...');
         const userInput = Userinput.value;
         appendMessage(userInput, "user");
@@ -83,12 +90,42 @@ Userinput.addEventListener('keydown', async (e) => {
         const reply = await sendMessage(the_package, "http://localhost:8000/receive_message");
         appendMessage(reply, "agent");
     }
-});
+}
 
 function appendMessage(text, role = "agent") {   // role: "user" | "agent" | "system"
-  const div = document.createElement("div");
-  div.className = "msg " + role;
-  div.textContent = text;                         // textContent avoids HTML injection
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;       // auto-scroll to the newest message
+  // Create wrapper
+  const wrapper = document.createElement("div");
+  wrapper.className = "msg-wrapper " + role;
+  
+  // Create avatar
+  const avatar = document.createElement("div");
+  avatar.className = "avatar " + role;
+  if (role === "user") {
+    avatar.textContent = "U";  // User avatar
+  } else if (role === "agent") {
+    avatar.textContent = "AI"; // Agent avatar
+  } else {
+    avatar.textContent = "⚙";  // System avatar
+  }
+  
+  // Create message bubble
+  const msg = document.createElement("div");
+  msg.className = "msg";
+  msg.textContent = text;  // textContent avoids HTML injection
+  
+  // Assemble
+  wrapper.appendChild(avatar);
+  wrapper.appendChild(msg);
+  chatContainer.appendChild(wrapper);
+  chatContainer.scrollTop = chatContainer.scrollHeight;  // auto-scroll to the newest message
 }
+
+closeChatButton.addEventListener("click", () => {
+    chatBox.hidden = true;
+    Userinput.hidden = true;
+    HistorySelect.hidden = true;
+    chatContainer.innerHTML = ''; // Clear previous messages
+
+    const response = sendMessage(conversation_id, "http://localhost:8000/delete_conversation");
+    console.log(`Operation feedback: ${response} `);
+});

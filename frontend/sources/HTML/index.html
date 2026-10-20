@@ -31,11 +31,14 @@
     </div>
 
     <br>
-    <input type="text" id="userInput" placeholder="Enter your input here" hidden="1">
     <p id="feedback"></p>
-    
-    <div id="messageInput" class="chat-box" hidden ="1">
-    <div class="msg system">Waiting for feedback...</div>
+
+    <div id="messageInput" class="chat-box" hidden="1">
+         <button id="closeChatButton" class="close-btn" type="button" aria-label="Close chat">&times;</button>
+        <div class="messages-container" id = "messagesContainer">
+            <div class="msg system">Waiting for feedback...</div>
+        </div>
+        <input type="text" id="userInput" placeholder="Enter your input here">
     </div>
 
     <script type="module" src="../JavaScript/APISelect.js"></script>

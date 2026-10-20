@@ -18,4 +18,6 @@
 
 ### 0.0.6 Fix the existing bug, complete the basic conversation functions
 
+### 0,0.7 Construct logging module
+
 crpyography would deal ** dialogue data(DB) ** in database and ** API_KEY(AI) ** in .ini

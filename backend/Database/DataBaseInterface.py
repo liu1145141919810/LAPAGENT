@@ -1,64 +1,22 @@
-import sqlite3
-from sqlalchemy import create_engine, Column, Integer, String, DateTime,ForeignKey, Enum
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker,relationship
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from datetime import datetime
 import configparser
 import os
 
 from Crypto.cryptography import Crypto
-from public.AI_configure import base_url_dict
-provider_list = list(base_url_dict.keys())
+from .DataDefine import Base, Roles, AI_Models, Conversation, Messages,provider_list
+from public.logger import setup_logger
+logger = setup_logger(__name__)
+
 # Using the abstract path
 _current_dir = os.path.dirname(os.path.abspath(__file__))
 _config_path = os.path.join(_current_dir, '..', 'public', 'public_config.ini')
 cfg = configparser.ConfigParser()
 cfg.read(_config_path)
 
-# One dp_path file for one DataBase Class
-#========== Following is the definition of different DataBase Themselves==============#
-Base = declarative_base()
-class Roles(Base):
-    __tablename__ = "roles"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(Enum('user', 'system'), nullable=False)
-class AI_Models(Base):
-    __tablename__ = "AI_Models"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(Enum(*provider_list), nullable=False)
-class Conversation(Base):
-    __tablename__ = "conversations"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    AI_Model_id = Column(Integer,ForeignKey('AI_Models.id'), nullable=False)
-    # It's the created time of conversation
-    timestamp = Column(DateTime, default=datetime.now)
-
-    messages = relationship(
-        "Messages",
-        back_populates="conversation",
-        cascade="all, delete-orphan"
-    )
-
-class Messages(Base):
-    __tablename__ = "messages"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    message = Column(String, nullable=False)
-    conversation_id = Column(
-        Integer,
-        ForeignKey('conversations.id'), 
-        nullable=False)
-    role_id = Column(
-        Integer,
-        ForeignKey('roles.id'), 
-        nullable=False)
-    # It's the created time of message
-    timestamp = Column(DateTime, default=datetime.now)
-
-    conversation = relationship("Conversation", back_populates="messages")
-
 #========== The Public DataBase Interface for all ====================================#
-  #only crypto the message
 class DataBaseInterface:
     def __init__(self,dp_path=None):
         if dp_path is None:
@@ -118,7 +76,7 @@ class DataBaseInterface:
             s.add(new_conversation)
             s.commit()
 
-            print("the index is ",new_conversation.id)
+            logger.info(f"the index is {new_conversation.id}")
             return new_conversation.id
         
     def del_conversation(self,conversation_id):
@@ -143,13 +101,13 @@ class DataBaseInterface:
         with self.SessionLocal() as s:
             role = s.query(Roles).filter(Roles.name == role_name).first()
             if not role:
-                print("Error: Role not found")
+                logger.error("Error: Role not found")
                 return None
             return role.id
     def check_role_name(self,role_id):
         with self.SessionLocal() as s:
             role = s.query(Roles).filter(Roles.id == role_id).first()
             if not role:
-                print("Error: Role not found")
+                logger.error("Error: Role not found")
                 return None
             return role.name
