@@ -12,4 +12,8 @@ async function sendMessage(userMessage,address){
     //else console.log('Message sent successfully');
     return backinfo;
     }
-export {sendMessage};
+const BASE_URL = 'http://localhost:8000';
+function AddBase(path){
+    return `${BASE_URL}/${path}`;
+}
+export {sendMessage,AddBase};

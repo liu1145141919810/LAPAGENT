@@ -12,13 +12,18 @@ cfg.read(_config_path)
 class Crypto:
     #Now use .ini to store the local key
     def __init__(self):
-        key_path = cfg.get('database', 'cryp_key_path')
-        real_key_path = os.path.normpath(os.path.join(_current_dir, key_path))
+        env_key_path = os.getenv('LAPAGENT_CRYPT_KEY_PATH')
+        key_path = env_key_path or cfg.get('database', 'cryp_key_path')
+        if os.path.isabs(key_path):
+            real_key_path = key_path
+        else:
+            real_key_path = os.path.normpath(os.path.join(_current_dir, key_path))
+
+        os.makedirs(os.path.dirname(real_key_path), exist_ok=True)
         if not os.path.exists(real_key_path):
             key = Fernet.generate_key()
             with open(real_key_path, 'wb') as key_file:
                 key_file.write(key)
-                key_file.close()
         else:
             with open(real_key_path, 'rb') as key_file:
                 key = key_file.read() 

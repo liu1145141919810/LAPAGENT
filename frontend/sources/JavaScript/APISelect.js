@@ -1,4 +1,4 @@
-import { sendMessage } from './public_usage.js';
+import { sendMessage,AddBase } from './public_usage.js';
 
 const baseAssetPath = '../../asset/';
 
@@ -19,7 +19,8 @@ setAPIKeyButton.addEventListener('click', () => {
 });
 const BaseObserver = new MutationObserver(async ()=>{
     if(!BaseSelect.hidden){
-        const response = await fetch("http://localhost:8000/get_base_list");
+        const response = await fetch(AddBase("get_base_list"));
+
         const data = await response.json();
         const list = data.bases;
 
@@ -53,7 +54,7 @@ BaseSelect.addEventListener('change', () => {
 apiKeyInput.addEventListener('keydown', async (e) => {
     if(e.key === 'Enter') {
         const apiKey = String(option) + ' ' + apiKeyInput.value;
-        sendMessage(apiKey,"http://localhost:8000/set_api_key");
+        sendMessage(apiKey,AddBase("set_api_key"));
         apiKeyInput.value = ''; // Clear the input field after pressing Enter
         ModelSelect.hidden = !ModelSelect.hidden;
         apiKeyInput.hidden = !apiKeyInput.hidden;
@@ -62,7 +63,7 @@ apiKeyInput.addEventListener('keydown', async (e) => {
      //=== for selecting subpart ===//
 const ModelObserver = new MutationObserver(async ()=>{
     if(!ModelSelect.hidden){
-        const response = await fetch("http://localhost:8000/get_model_list");
+        const response = await fetch(AddBase("get_model_list"));
         const data = await response.json();
         const list = data.models;
         
@@ -88,7 +89,7 @@ ModelSelect.addEventListener('change', () => {
     console.log('Activated')
     ModelSelect.hidden = !ModelSelect.hidden;
     setAPIKeyButton.hidden = !setAPIKeyButton.hidden;
-    sendMessage(ModelSelect.value,"http://localhost:8000/set_model");
+    sendMessage(ModelSelect.value,AddBase("set_model"));
 })
 
 export default optionReader;

@@ -9,6 +9,7 @@ from Crypto.cryptography import Crypto
 from .DataDefine import Base, Roles, AI_Models, Conversation, Messages,provider_list
 from public.logger import setup_logger
 logger = setup_logger(__name__)
+from public.util import PublicToolKit
 
 # Using the abstract path
 _current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -20,10 +21,16 @@ cfg.read(_config_path)
 class DataBaseInterface:
     def __init__(self,dp_path=None):
         if dp_path is None:
-            rel_path = cfg.get('database', 'db_path')
-            dp_path = os.path.normpath(os.path.join(_current_dir, rel_path))
+            env_db_path = os.getenv('LAPAGENT_DB_PATH')
+            rel_path = env_db_path or cfg.get('database', 'db_path')
+            if os.path.isabs(rel_path):
+                dp_path = rel_path
+            else:
+                dp_path = os.path.normpath(os.path.join(_current_dir, rel_path))
         self.db_path = dp_path
         self.crypto=Crypto()
+
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
 
         #echo: whether to log SQL statements; False means no logging
         engine = create_engine(f"sqlite:///{self.db_path}", echo=False)

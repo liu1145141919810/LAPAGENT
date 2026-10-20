@@ -5,6 +5,7 @@ import configparser
 
 from Crypto.cryptography import Crypto
 from public.AI_configure import base_url_dict
+from public.util import PublicToolKit
 
 from public.logger import setup_logger
 logger = setup_logger(__name__)
@@ -17,33 +18,55 @@ cfg.read(_config_path)
 class Agent:
     def __init__(self):
         self.crypto=Crypto()
+        self.read_env=PublicToolKit()._read_secret_from_env
         self.api_model = None  # initialize the model name as None
         self.api_provider = None  # initialize the provider name as None
+        self.client = None
         try:
-            api_key = cfg.get('AIAgent', 'api_key')
-            api_key = self.crypto.decode(api_key)
-            
-            api_model = cfg.get('AIAgent', 'api_model')
-            self.api_model = self.crypto.decode(api_model)
-            api_provider = cfg.get('AIAgent', 'api_provider')
-            self.api_provider = self.crypto.decode(api_provider)
+            api_key = self.read_env('LAPAGENT_API_KEY', 'LAPAGENT_API_KEY_FILE')
+            if api_key is None:
+                api_key = cfg.get('AIAgent', 'api_key')
+                api_key = self.crypto.decode(api_key)
 
+            self.api_model = os.getenv('LAPAGENT_API_MODEL')
+            if self.api_model is None:
+                api_model = cfg.get('AIAgent', 'api_model')
+                self.api_model = self.crypto.decode(api_model)
+
+            self.api_provider = os.getenv('LAPAGENT_API_PROVIDER')
+            if self.api_provider is None:
+                api_provider = cfg.get('AIAgent', 'api_provider')
+                self.api_provider = self.crypto.decode(api_provider)
+            if not self.api_provider:
+                self.api_provider = "openai"  # default to OpenAI if no provider is specified
+              
             self.client = OpenAI(
                 api_key=api_key,
-                base_url=base_url_dict.get(self.api_provider, "https://api.openai.com/v1")    
+                base_url=self._resolve_base_url()    
             )
         except Exception as e:
             logger.warning(f"Error occurred during Agent initialization: {e}")
+
+    def _resolve_base_url(self) -> str:
+        return os.getenv('LAPAGENT_API_BASE_URL') or base_url_dict.get(
+            self.api_provider,
+            'https://api.openai.com/v1')
+    
     def set_API_key(self, api):
-        api_key = api.split(' ')[1] # Extract the actual API key after the prefix
-        self.api_provider = api.split(' ')[0]  # Extract the model name before the space
+        parts = api.split(' ', 1)
+        if len(parts) != 2:
+            logger.error('Invalid API key format. Expected: "provider api_key".')
+            return
+        api_key = parts[1].strip()  # Extract the actual API key after the prefix
+        self.api_provider = parts[0].strip()  # Extract the provider name before the space
+        
         try:
             encrypted_key = self.crypto.encode(api_key)
             encrypted_provider = self.crypto.encode(self.api_provider)
 
             self.client = OpenAI(
                 api_key=api_key, 
-                base_url=base_url_dict.get(self.api_provider, "https://api.openai.com/v1")
+                base_url=self._resolve_base_url()
                 )
 
             with open(os.path.join(_current_dir, '..', 'public', 'public_config.ini'), 'w') as configfile:

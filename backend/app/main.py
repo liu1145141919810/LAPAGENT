@@ -1,17 +1,21 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
+
 from Database.DataBaseInterface import DataBaseInterface
 from Agent.agent import Agent
 from public.AI_configure import base_url_dict
-
 from public.logger import setup_logger
 logger = setup_logger(__name__)
+
+cors_origins_env = os.getenv("LAPAGENT_CORS_ORIGINS", "http://localhost:5173")
+cors_origins = [origin.strip() for origin in cors_origins_env.split(',') if origin.strip()]
 
 app = FastAPI(title = "LapAgent Backend",version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

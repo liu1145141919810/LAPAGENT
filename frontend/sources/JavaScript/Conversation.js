@@ -1,5 +1,5 @@
 import optionReader from './APISelect.js';
-import { sendMessage } from './public_usage.js';
+import { sendMessage,AddBase } from './public_usage.js';
 
 const Startbutton = document.getElementById('startButton');
 const Loadbutton = document.getElementById('loadButton');
@@ -22,7 +22,7 @@ Startbutton.addEventListener('click', async () => {
     }
     try {
         const response = await sendMessage(val,
-            "http://localhost:8000/start_conversation");
+            AddBase("start_conversation"));
         conversation_id = response;
         //const data = await response.json();
     } catch (e) {
@@ -35,7 +35,7 @@ Loadbutton.addEventListener('click', async () => {
     HistorySelect.hidden = false;
 
     try{
-        const history = await fetch("http://localhost:8000/load_history");
+        const history = await fetch(AddBase("load_history"));
         const data = await history.json();
         HistorySelect.innerHTML = '<optgroup label="History"></optgroup>';
         const optgroup = HistorySelect.querySelector('optgroup');
@@ -56,12 +56,12 @@ HistorySelect.addEventListener('change', async () => {
     const choosenConversationId = Number(HistorySelect.value.split(' - ')[1]);  
     conversation_id = choosenConversationId; // Update the global conversation_id variable 
 
-    const data = await sendMessage(choosenConversationId, "http://localhost:8000/load_conversation");
+    const data = await sendMessage(choosenConversationId, AddBase("load_conversation"));
     
     chatContainer.innerHTML = ''; // Clear previous messages
 
     for (const msg of data){
-        const role_name = await sendMessage(msg.role_id, "http://localhost:8000/check_role_name");
+        const role_name = await sendMessage(msg.role_id, AddBase("check_role_name"));
         if (role_name == "user")
             appendMessage(msg.message, "user");
         else if (role_name == "system")
@@ -78,7 +78,7 @@ async function  InputKeydownHandler(e) {
         const userInput = Userinput.value;
         appendMessage(userInput, "user");
         Userinput.value = '';
-        const role_id = await sendMessage("user", "http://localhost:8000/check_role");
+        const role_id = await sendMessage("user", AddBase("check_role"));
         
         let the_package ={
             message:userInput,
@@ -87,7 +87,7 @@ async function  InputKeydownHandler(e) {
         };
 
         Userinput.value = ''; // Clear the input field after pressing Enter
-        const reply = await sendMessage(the_package, "http://localhost:8000/receive_message");
+        const reply = await sendMessage(the_package, AddBase("receive_message"));
         appendMessage(reply, "agent");
     }
 }
@@ -126,6 +126,6 @@ closeChatButton.addEventListener("click", () => {
     HistorySelect.hidden = true;
     chatContainer.innerHTML = ''; // Clear previous messages
 
-    const response = sendMessage(conversation_id, "http://localhost:8000/delete_conversation");
+    const response = sendMessage(conversation_id, AddBase("delete_conversation"));
     console.log(`Operation feedback: ${response} `);
 });
