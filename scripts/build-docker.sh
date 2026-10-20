@@ -1,0 +1,1 @@
+docker build -t lapagent-backend:latest ../backend
