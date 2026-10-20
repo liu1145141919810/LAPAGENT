@@ -25,8 +25,11 @@ class Agent:
         try:
             api_key = self.read_env('LAPAGENT_API_KEY', 'LAPAGENT_API_KEY_FILE')
             if api_key is None:
+                logger.info("API key not found in environment variables, reading from config file.")
                 api_key = cfg.get('AIAgent', 'api_key')
                 api_key = self.crypto.decode(api_key)
+            else:
+                logger.info("API key found in environment variables.")
 
             self.api_model = os.getenv('LAPAGENT_API_MODEL')
             if self.api_model is None:
