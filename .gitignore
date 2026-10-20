@@ -9,3 +9,4 @@ note_book/*
 *.ini
 *.txt
 backend/public/logs/*
+.example
