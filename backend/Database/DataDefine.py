@@ -12,7 +12,7 @@ Base = declarative_base()
 class Roles(Base):
     __tablename__ = "roles"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(Enum('user', 'system'), nullable=False)
+    name = Column(Enum('user', 'system','agent'), nullable=False)
 class AI_Models(Base):
     __tablename__ = "AI_Models"
     id = Column(Integer, primary_key=True, autoincrement=True)

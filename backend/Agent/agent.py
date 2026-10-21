@@ -88,6 +88,10 @@ class Agent:
             cfg.write(configfile)
             logger.info(f"Model has been set to {self.api_model} and saved successfully")
         # have a brief try here
+    def read_model(self):
+        return self.api_model
+    def read_provider(self):
+        return self.api_provider
     def interact(self,msg=None):
         try:
             response = self.client.chat.completions.create(

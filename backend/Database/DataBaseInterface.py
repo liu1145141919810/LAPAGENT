@@ -38,7 +38,7 @@ class DataBaseInterface:
         self.SessionLocal = sessionmaker(bind=engine)
         with self.SessionLocal() as session:
             if session.query(Roles).count() == 0:
-                session.add_all([Roles(name='user'), Roles(name='system')])
+                session.add_all([Roles(name='user'), Roles(name='system'), Roles(name='agent')],)
             existing_models = session.query(AI_Models).all()
             for m in provider_list:
                 if m not in [model.name for model in existing_models]:

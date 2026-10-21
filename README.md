@@ -24,6 +24,8 @@
 
 This is the preparation for encapsulated distributtion
 
+### 0.0.9 Add the Simple Redit Functions
+
 ## Backend Docker (Python 3.13 slim)
 
 ### Build
