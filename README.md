@@ -26,6 +26,10 @@ This is the preparation for encapsulated distributtion
 
 ### 0.0.9 Add the Simple Redit Functions
 
+### 0.0.10 Realize the Host-Server mechanism(provide redis service)
+
+## Some relevant technical information
+
 ## Backend Docker (Python 3.13 slim)
 
 ### Build

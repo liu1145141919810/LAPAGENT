@@ -74,7 +74,12 @@ async def get_able_models():
 
 @app.get("/get_base_list")
 async def get_able_providers():
+    cache_key = "base_list"
+    cached_base_list = await redis_manager.get_cache(cache_key)
+    if cached_base_list is not None:
+        return {"bases": cached_base_list}
     base_list = list(base_url_dict.keys())
+    await redis_manager.set_cache(cache_key, base_list)
     return {"bases": base_list}
 
 @app.post("/set_model")
@@ -90,7 +95,12 @@ async def load_history():
 
 @app.get("/get_agent_provider")
 async def get_agent_provider():
+    cache_key = "agent_provider"
+    cached_provider = await redis_manager.get_cache(cache_key)
+    if cached_provider is not None:
+        return {"provider": cached_provider}
     provider = agent.read_provider()
+    await redis_manager.set_cache(cache_key, provider)
     return {"provider": str(provider)}
 
 @app.post("/start_conversation")
@@ -115,10 +125,16 @@ async def load_conversation(request:dict):
 @app.post("/check_role")
 async def check_role(request:dict):
     role_name = request.get("message")
+    cache_key = f"role:{role_name}"
+    cached_role = await redis_manager.get_cache(cache_key)
+    if cached_role is not None:
+        return {"reply": cached_role}
     if not role_name:
         logger.warning("No role name provided.")
         return {"error": "No role name provided."}
-    return {"reply": db.check_role(role_name)}
+    role = db.check_role(role_name)
+    await redis_manager.set_cache(cache_key, role)
+    return {"reply": role}
 
 @app.post("/check_role_name")
 async def check_role_name(request:dict):

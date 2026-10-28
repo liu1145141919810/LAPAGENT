@@ -9,5 +9,5 @@ note_book/*
 *.ini
 backend/utils/*
 backend/public/logs/*
-backend/.pytest_cache
+*.pytest_cache
 *.env
