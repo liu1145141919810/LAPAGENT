@@ -10,8 +10,15 @@ const agentImage = document.getElementById('agentImage');
 
 let option=null;
 
-function optionReader(){
-    return option;
+async function optionReader(){
+    if (option != null)return option;
+    else{
+        const response = await fetch(AddBase("get_agent_provider"));
+        const data = await response.json();
+        option = data.provider;
+        if (option != null) return option;
+        else return null;
+    }
 }
 setAPIKeyButton.addEventListener('click', () => {
     setAPIKeyButton.hidden = !setAPIKeyButton.hidden;

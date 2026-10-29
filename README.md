@@ -24,6 +24,23 @@
 
 This is the preparation for encapsulated distributtion
 
+### 0.0.9 Add the Simple Redit Functions
+
+### 0.0.10 Realize the Host-Server mechanism(provide redis service)
+
+### 0.1.0 Develop some tools that could be used for agents
+
+### 0.1.1 Some improvement for the existing functions
+Potential Problems: Agetn tend to use the functions till end
+
+## Some relevant technical information
+
+### Agent Configuration:
+
+The maximum of tool-application recursion : 5 times
+
+The maximum of context: 5 interactions
+
 ## Backend Docker (Python 3.13 slim)
 
 ### Build

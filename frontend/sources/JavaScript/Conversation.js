@@ -15,7 +15,7 @@ Startbutton.addEventListener('click', async () => {
     Userinput.hidden = false;
     chatBox.hidden = false;
     HistorySelect.hidden = false;
-    const val=optionReader();
+    const val= await optionReader();
     if (!val) {
         console.error('No provider selected. Please select a provider first.');
         return;
@@ -39,6 +39,14 @@ Loadbutton.addEventListener('click', async () => {
         const data = await history.json();
         HistorySelect.innerHTML = '<optgroup label="History"></optgroup>';
         const optgroup = HistorySelect.querySelector('optgroup');
+
+        const option = document.createElement('option');
+        option.value = 'History';
+        option.textContent = 'History';
+        option.disabled = true;
+        option.selected = true;
+        optgroup.appendChild(option);
+
         for (const item of data) {
             const option = document.createElement('option');
             option.value = `${item.AI_Model} - ${item.conversation_id}`;;
@@ -64,7 +72,7 @@ HistorySelect.addEventListener('change', async () => {
         const role_name = await sendMessage(msg.role_id, AddBase("check_role_name"));
         if (role_name == "user")
             appendMessage(msg.message, "user");
-        else if (role_name == "system")
+        else if (role_name == "agent")
             appendMessage(msg.message, "agent");
     }
 })
