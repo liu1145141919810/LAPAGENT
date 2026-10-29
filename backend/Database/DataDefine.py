@@ -61,3 +61,8 @@ class Messages(Base):
     timestamp = Column(DateTime, default=datetime.now)
 
     conversation = relationship("Conversation", back_populates="messages")
+
+class Memory(Base):
+    __tablename__ = "memory"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    content = Column(String, nullable=False)

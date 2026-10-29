@@ -2,6 +2,8 @@ from openai import OpenAI
 
 import os
 import configparser
+import json
+from collections import deque
 
 from Crypto.cryptography import Crypto
 from public.AI_configure import base_url_dict
@@ -15,13 +17,28 @@ _config_path = os.path.join(_current_dir, '..', 'public', 'public_config.ini')
 cfg = configparser.ConfigParser()
 cfg.read(_config_path)
 
+from .toolbox import AgentToolBox
+
 class Agent:
-    def __init__(self):
+    def __init__(self,db):
         self.crypto=Crypto()
         self.read_env=PublicToolKit()._read_secret_from_env
         self.api_model = None  # initialize the model name as None
         self.api_provider = None  # initialize the provider name as None
         self.client = None
+        self.maxSoleDepth = 8  # set a default maximum tool call depth
+        self.maxConversationDepth = 10  # set a default maximum conversation depth
+        self.toolbox = AgentToolBox(db)  # initialize the toolbox instance
+        self.messages = deque(maxlen=self.maxConversationDepth)
+
+        self.messages.append(
+            [
+                {
+                    "role": "system",
+                    "content": "You are a helpful AI assistant."
+                },
+            ],
+        )
         try:
             api_key = self.read_env('LAPAGENT_API_KEY', 'LAPAGENT_API_KEY_FILE')
             if api_key is None:
@@ -54,7 +71,7 @@ class Agent:
         return os.getenv('LAPAGENT_API_BASE_URL') or base_url_dict.get(
             self.api_provider,
             'https://api.openai.com/v1')
-    
+
     def set_API_key(self, api):
         parts = api.split(' ', 1)
         if len(parts) != 2:
@@ -80,6 +97,7 @@ class Agent:
                 logger.info(f"API key has been set and saved successfully")
         except Exception as e:
             logger.error(f"Error occurred for the provided API key: {e}")
+
     def set_model(self, model):
         self.api_model = model
         model = self.crypto.encode(model)
@@ -87,26 +105,13 @@ class Agent:
             cfg.set('AIAgent', 'api_model', model)
             cfg.write(configfile)
             logger.info(f"Model has been set to {self.api_model} and saved successfully")
-        # have a brief try here
+    
     def read_model(self):
         return self.api_model
+
     def read_provider(self):
         return self.api_provider
-    def interact(self,msg=None):
-        try:
-            response = self.client.chat.completions.create(
-                model=self.api_model,
-                messages=[
-                    {"role": "system", "content": "你是一个有帮助的 AI 助手。"},
-                    {"role": "user", "content": str(msg)}
-                ]
-            )
-            answer = response.choices[0].message.content
-            logger.info(f"AI Assistant: {answer}")
-            return answer
-        except Exception as e:
-            logger.error(f"Error during interaction: {e}")
-            return f"Error: {str(e)}"
+
     def get_model_list(self):
         try:
             models = self.client.models.list()
@@ -115,3 +120,58 @@ class Agent:
         except Exception as e:
             logger.error(f"Error retrieving model list: {e}")
             return []
+
+    def set_tool_conversation_id(self,conversation_id):
+        logger.info(f"Setting tool conversation ID to {conversation_id}")
+        self.toolbox.backinfo["conversation_id"] = conversation_id
+        
+    #Following function could be directly used by the users
+    def session_interact(self,input):
+        input = {"role": "user", "content": input}
+        self.messages[-1].append(input)
+
+        msgs = []
+        for msg in self.messages:
+            msgs.extend(msg)
+        msg = self.messages[-1]
+        self.messages.append([])
+        answer = self.sole_interact(msgs,msg)
+        return answer
+    
+    def sole_interact(self,msgs,current_msg):
+        tool_option = "auto"
+        try:
+            while True:
+                if len(current_msg) == self.maxSoleDepth-1:
+                    logger.warning("Maximum tool depth reached")
+                    tool_option = "none"
+                response = self.client.chat.completions.create(
+                    model=self.api_model,
+                    messages=msgs,
+                    tools=self.toolbox.tool_definitions(),
+                    tool_choice=tool_option
+                )
+                tool_calls = response.choices[0].message.tool_calls
+                if tool_calls:
+                    for call in tool_calls:
+                        if len(current_msg) == self.maxSoleDepth-1:
+                            break
+                        logger.info(f"Tool called: {call}")
+                        name = call.function.name
+                        arguments = json.loads(call.function.arguments or "{}")
+                        result = self.toolbox.call(name, **arguments)
+                        logger.info(f"Tool result: {result}")
+                        message_pack = {
+                            "role": "tool",
+                            "tool_call_id": call.id,
+                            "name": name,
+                            "content": json.dumps(result,default=str)
+                        }
+                        current_msg.append(message_pack)
+                else:
+                    answer = response.choices[0].message.content
+                    logger.info(f"Answer: {answer}")
+                    return answer
+        except Exception as e:
+            logger.error(f"Error during interaction: {e}")
+            return f"Error: {str(e)}"

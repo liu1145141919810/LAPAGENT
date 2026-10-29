@@ -13,9 +13,11 @@ from .DataDefine import (
     Conversation,
     Messages,
     provider_list,
+    Memory,
     validate_model_name,
     validate_role_name,
 )
+
 from public.logger import setup_logger
 logger = setup_logger(__name__)
 from public.util import PublicToolKit
@@ -67,6 +69,7 @@ class DataBaseInterface:
                 if m not in [model.name for model in existing_models]:
                     session.add(AI_Models(name=m))
             session.commit()
+
     def all_history(self):
         all_history = []
         with self.SessionLocal() as s:
@@ -84,6 +87,7 @@ class DataBaseInterface:
                 }
                 all_history.append(conversation_history)
         return all_history
+    
     def store_message(self,data):
         timestamp = datetime.now()
         message = data.get("message")
@@ -97,6 +101,7 @@ class DataBaseInterface:
         with self.SessionLocal() as s:
             s.add(msg)
             s.commit()
+
     def new_conversation(self,model_name):
         with self.SessionLocal() as s:
             model = s.query(AI_Models).filter(AI_Models.name == model_name).first()
@@ -116,6 +121,7 @@ class DataBaseInterface:
                 raise ValueError(f"Conversation with ID '{conversation_id}' not found.")
             s.delete(conversation)
             s.commit()
+
     def load_conversation(self,conversation_id):
         all_messages = []
         with self.SessionLocal() as s:
@@ -127,6 +133,7 @@ class DataBaseInterface:
                 }
                 all_messages.append(message_data)
         return all_messages
+    
     def check_role(self,role_name):
         with self.SessionLocal() as s:
             role = s.query(Roles).filter(Roles.name == role_name).first()
@@ -134,6 +141,7 @@ class DataBaseInterface:
                 logger.error("Error: Role not found")
                 return None
             return role.id
+        
     def check_role_name(self,role_id):
         with self.SessionLocal() as s:
             role = s.query(Roles).filter(Roles.id == role_id).first()
@@ -141,3 +149,16 @@ class DataBaseInterface:
                 logger.error("Error: Role not found")
                 return None
             return role.name
+        
+    def check_memory(self):
+        with self.SessionLocal() as s:
+            memories = s.query(Memory).all()
+            return [{"id": m.id, "content": m.content} for m in memories]
+        
+    def store_memory(self, content):
+        with self.SessionLocal() as s:
+            new_memory = Memory(content=content)
+            s.add(new_memory)
+            s.commit()
+            s.refresh(new_memory)
+            return new_memory.id

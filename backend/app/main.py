@@ -13,7 +13,7 @@ cors_origins_env = os.getenv("LAPAGENT_CORS_ORIGINS", "http://localhost:5173")
 cors_origins = [origin.strip() for origin in cors_origins_env.split(',') if origin.strip()]
 
 db=DataBaseInterface()
-agent=Agent()
+agent=Agent(db)
 redis_manager = RedisManager()
 
 app = FastAPI(
@@ -44,7 +44,7 @@ async def receive_message(request: dict):
     user_message = user_package.get("message")
 
     logger.info(f"User message received: {user_message}")
-    feedback = agent.interact(user_message)
+    feedback = agent.session_interact(user_message)
 
     sys_package ={
         "message": feedback,
@@ -111,6 +111,7 @@ async def start_conversation(request: dict):
             logger.warning("No model set. Please set a model first.")
             return {"error": "No model set. Please set a model first."}
     conversation_id = db.new_conversation(model_name)
+    agent.set_tool_conversation_id(conversation_id)
     logger.info(f"Started new conversation with ID: {conversation_id}")
     return {"reply": conversation_id}
 
@@ -120,6 +121,7 @@ async def load_conversation(request:dict):
     if not conversation_id:
         logger.warning("No conversation ID provided.")
         return {"error": "No conversation ID provided."}
+    agent.set_tool_conversation_id(conversation_id)
     return {"reply": db.load_conversation(conversation_id)}
 
 @app.post("/check_role")
