@@ -153,10 +153,14 @@ class DataBaseInterface:
     def check_memory(self):
         with self.SessionLocal() as s:
             memories = s.query(Memory).all()
-            return [{"id": m.id, "content": m.content} for m in memories]
+            return [
+                {"id": m.id, "content": self.crypto.decode(m.content)}
+                 for m in memories
+            ]
         
     def store_memory(self, content):
         with self.SessionLocal() as s:
+            content = self.crypto.encode(content)
             new_memory = Memory(content=content)
             s.add(new_memory)
             s.commit()

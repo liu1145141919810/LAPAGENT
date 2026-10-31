@@ -32,10 +32,12 @@ button:disabled {
 .chat-box {
   width: 600px;
   max-width: 100%;
-  height: 360px;              /* fixed size */
+  min-width: 280px;
+  height: 360px;
+  min-height: 220px;
   margin: 12px auto;
   padding: 12px;
-  padding-bottom: 60px;       /* space for input box */
+  padding-bottom: 60px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -46,6 +48,14 @@ button:disabled {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   text-align: left;
   position: relative;
+  resize: both;
+  overflow: auto;
+}
+#messageInput {
+  position: fixed;
+  left: 25%;
+  top: 20%;
+  transform: translate(-50%, -50%);
 }
 
 /* Close (X) button, top-left of the chat box */
@@ -89,6 +99,8 @@ button:disabled {
   scroll-behavior: smooth;
   text-align: left;
   position: relative;
+  resize: both;
+  overflow: auto;
 }
 /* Input box at bottom center */
 .chat-box #userInput {
@@ -97,12 +109,17 @@ button:disabled {
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 24px);
+  min-height: 42px;
+  max-height: 160px;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 14px;
   box-sizing: border-box;
   outline: none;
+  resize: vertical;
+  overflow: auto;
+  font-family: inherit;
 }
 
 .chat-box #userInput:focus {

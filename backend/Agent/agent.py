@@ -20,7 +20,7 @@ cfg.read(_config_path)
 from .toolbox import AgentToolBox
 
 class Agent:
-    def __init__(self,db):
+    def __init__(self,db,redis):
         self.crypto=Crypto()
         self.read_env=PublicToolKit()._read_secret_from_env
         self.api_model = None  # initialize the model name as None
@@ -28,17 +28,10 @@ class Agent:
         self.client = None
         self.maxSoleDepth = 8  # set a default maximum tool call depth
         self.maxConversationDepth = 10  # set a default maximum conversation depth
-        self.toolbox = AgentToolBox(db)  # initialize the toolbox instance
+        self.toolbox = AgentToolBox(db,redis)  # initialize the toolbox instance
         self.messages = deque(maxlen=self.maxConversationDepth)
 
-        self.messages.append(
-            [
-                {
-                    "role": "system",
-                    "content": "You are a helpful AI assistant."
-                },
-            ],
-        )
+        self.reload_messages()
         try:
             api_key = self.read_env('LAPAGENT_API_KEY', 'LAPAGENT_API_KEY_FILE')
             if api_key is None:
@@ -121,12 +114,13 @@ class Agent:
             logger.error(f"Error retrieving model list: {e}")
             return []
 
-    def set_tool_conversation_id(self,conversation_id):
+    def refresh_conversation(self,conversation_id):
         logger.info(f"Setting tool conversation ID to {conversation_id}")
         self.toolbox.backinfo["conversation_id"] = conversation_id
+        self.reload_messages()
         
     #Following function could be directly used by the users
-    def session_interact(self,input):
+    async def session_interact(self,input):
         input = {"role": "user", "content": input}
         self.messages[-1].append(input)
 
@@ -135,10 +129,10 @@ class Agent:
             msgs.extend(msg)
         msg = self.messages[-1]
         self.messages.append([])
-        answer = self.sole_interact(msgs,msg)
+        answer = await self.sole_interact(msgs,msg)
         return answer
     
-    def sole_interact(self,msgs,current_msg):
+    async def sole_interact(self,msgs,current_msg):
         tool_option = "auto"
         try:
             while True:
@@ -159,7 +153,7 @@ class Agent:
                         logger.info(f"Tool called: {call}")
                         name = call.function.name
                         arguments = json.loads(call.function.arguments or "{}")
-                        result = self.toolbox.call(name, **arguments)
+                        result = await self.toolbox.call(name, **arguments)
                         logger.info(f"Tool result: {result}")
                         message_pack = {
                             "role": "tool",
@@ -175,3 +169,24 @@ class Agent:
         except Exception as e:
             logger.error(f"Error during interaction: {e}")
             return f"Error: {str(e)}"
+
+    def reload_messages(self):
+        self.messages.clear()
+        prompts = cfg['prompt']
+        if not prompts:
+            logger.warning("No prompts found, using default system message.")
+            self.messages.append([
+                {
+                    "role": "system",
+                    "content": "You are a helpful AI assistant."
+                }
+            ])
+        else:
+            self.messages.append([])
+            for key in prompts:
+                self.messages[0].append(
+                    {
+                        "role": "system",
+                        "content": prompts[key]
+                    }
+                )
