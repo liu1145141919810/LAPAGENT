@@ -33,13 +33,15 @@ This is the preparation for encapsulated distributtion
 ### 0.1.1 Some improvement for the existing functions
 Potential Problems: Agetn tend to use the functions till end
 
+### 0.1.2 Complete the backend encapsulation and the web seach tool
+
 ## Some relevant technical information
 
 ### Agent Configuration:
 
-The maximum of tool-application recursion : 5 times
+The maximum of tool-application recursion : 8 times
 
-The maximum of context: 5 interactions
+The maximum of context: 10 interactions
 
 ## Backend Docker (Python 3.13 slim)
 

@@ -39,6 +39,13 @@ class AgentToolBox:
             msg = await handler(**lwargs)
         else:
             msg = handler(**lwargs)
+
+        if isinstance(msg, dict) and "error" in msg:
+            return {
+                "status": "error",
+                "data": msg,
+                "message": msg["error"]
+            }
         return {
             "status": "success",
             "data": msg,
@@ -89,11 +96,20 @@ class AgentToolBox:
                 "type": "function",
                 "function":{
                     "name": "search_the_Internet",
-                    "description":"This function is not realized yet, don't use it for now",
+                    "description":"Return back the search results from the Internet",
                     "parameters": {
                         "type": "object",
-                        "properties": {},
-                        "required": []
+                        "properties": {
+                            "query": {"type": "string"},
+                            "max_results":{
+                                "type": "integer",
+                                "description": "Maximum number of search results to return",
+                                "minimum": 1,
+                                "maximum": 5,
+                                "default": 5,
+                            }
+                        },
+                        "required": ["query"]
                     }
                 }
             }
@@ -137,6 +153,20 @@ class AgentToolBox:
             await self.redis.set_cache(cache_key, memories)
         return {"memories": memories}
 
-    def search_the_Internet(self, **kwargs: Any) -> Dict[str, Any]:
+    async def search_the_Internet(self, **kwargs: Any) -> Dict[str, Any]:
         self.__set("search_the_Internet")
-        pass
+
+        query = kwargs.get("query")
+        max_results = kwargs.get("max_results", 5)
+
+        if not isinstance(query, str) or not query.strip():
+           return {"error": "A non-empty query is required"}
+        if len(query.strip())>500:
+            return {"error": "Query length exceeds 500 characters"}
+        if not isinstance(max_results, int) or max_results < 1 or max_results > 5:
+            return {"error": "max_results must be an integer between 1 and 5"}
+
+        return await self.web_crawl.search(
+            query=query.strip(),
+            max_results=max_results
+        )

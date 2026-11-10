@@ -30,9 +30,9 @@ app.add_middleware(
 )
 
 #=========Area for Address Functions=========//
-@app.get("/")
-async def root():
-    return {"message": "Hello World\n"}
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 #Converted it into a structure both have receive and transmit
 @app.post("/receive_message")

@@ -11,3 +11,4 @@ backend/utils/*
 backend/public/logs/*
 *.pytest_cache
 *.env
+cloc-lang-def.txt
