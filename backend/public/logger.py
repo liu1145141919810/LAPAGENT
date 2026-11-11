@@ -16,7 +16,7 @@ LOG_BACKUP_COUNT = int(os.getenv('LAPAGENT_LOG_BACKUP_COUNT', cfg.getint('loggin
 
 _log_dir_path = os.path.join(_current_dir, LOG_DIR)
 os.makedirs(_log_dir_path, exist_ok=True)
-_log_file_path = os.path.join(_log_dir_path, 'lapagent.log')
+_log_file_path = os.path.join(_log_dir_path, 'lapagent_backend.log')
 
 def setup_logger(name:str=None)->logging.Logger:
     # Return a logger instance with the specified configuration

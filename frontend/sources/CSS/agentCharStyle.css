@@ -1,0 +1,33 @@
+.agent-animated {
+  display: block;
+  flex: 0 0 420px;
+  width: 420px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 18px;
+  object-fit: contain;
+  position: relative;
+  margin: 10px 0 0 0;
+  top: 0;
+  left: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .app-container {
+    flex-wrap: wrap;
+  }
+
+  .main-content,
+  #messageInput,
+  .agent-animated {
+    flex-basis: 100%;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}

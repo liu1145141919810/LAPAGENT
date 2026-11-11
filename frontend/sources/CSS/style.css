@@ -1,3 +1,35 @@
+.app-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 20px;
+    flex-wrap: nowrap;
+}
+
+.main-content {
+    flex: 0 0 360px;
+    min-width: 280px;
+}
+
+@media (max-width: 900px) {
+    .app-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .main-content {
+        width: 100%;
+        max-width: 700px;
+    }
+}
+
 /* Button styles */
 button {
     padding: 8px 16px;
@@ -30,12 +62,12 @@ button:disabled {
 /*    Conversation Box Styles    */
 /* Chat window */
 .chat-box {
-  width: 600px;
+  width: min(40vw, 460px);
   max-width: 100%;
-  min-width: 280px;
+  min-width: 260px;
   height: 360px;
   min-height: 220px;
-  margin: 12px auto;
+  margin: 12px 0 12px auto;
   padding: 12px;
   padding-bottom: 60px;
   box-sizing: border-box;
@@ -52,10 +84,12 @@ button:disabled {
   overflow: auto;
 }
 #messageInput {
-  position: fixed;
-  left: 25%;
-  top: 20%;
-  transform: translate(-50%, -50%);
+  flex: 0 0 460px;
+  position: relative;
+  left: 0;
+  top: 0;
+  transform: none;
+  margin: 12px 0 0 0;
 }
 
 /* Close (X) button, top-left of the chat box */

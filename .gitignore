@@ -12,3 +12,5 @@ backend/public/logs/*
 *.pytest_cache
 *.env
 cloc-lang-def.txt
+frontend/node_modules
+logs/*

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "electron-log": "^5.4.4"
+  }
+}
