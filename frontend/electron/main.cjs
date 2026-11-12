@@ -5,6 +5,7 @@ const {
 } = require('./backendManager.cjs')
 const log = require('./logger.cjs');
 
+let isQuitting = false;
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
@@ -26,10 +27,19 @@ app.whenReady().then(async () => {
     app.quit();
   }
 });
-app.on('before-quit', async () => {
+
+app.on('before-quit', async (event) => {
+  if (isQuitting) {
+    return;
+  }
+  event.preventDefault();
+  isQuitting = true;
   try {
     await stopBackend();
+    log.info("Backend stopped successfully.");
   } catch(error){
     log.error('Failed to stop backend:', error);
+  } finally {
+    app.exit(0);
   }
 });

@@ -4,17 +4,20 @@ import asyncio
 from public.logger import setup_logger
 logger = setup_logger(__name__)
 from Webcrawl.webcrawl import WebCrawl
+from Agent.memory import MemoryAdapter
 
 class AgentToolBox:
     def __init__(self,db,redis):
         self.db = db
         self.redis = redis
         self.web_crawl = WebCrawl()
+        self.memory_adapter = MemoryAdapter(db)
         self.handlers={
             "load_current_history": self.load_current_history,
             "load_memory": self.load_memory,
             "save_memory": self.save_memory,
-            "search_the_Internet": self.search_the_Internet
+            "search_the_Internet": self.search_the_Internet,
+            "reflect_the_memory": self.reflect_the_memory,
         }
         self.backinfo={
             "conversation_id": None,
@@ -22,7 +25,8 @@ class AgentToolBox:
                 "load_current_history": None,
                 "load_memory": None,
                 "save_memory": None,
-                "search_the_Internet": None
+                "search_the_Internet": None,
+                "reflect_the_memory": None,
             },
         }
 
@@ -112,6 +116,20 @@ class AgentToolBox:
                         "required": ["query"]
                     }
                 }
+            },
+            {
+                "type": "function",
+                "function":{
+                    "name":"reflect_the_memory",
+                    "description":"This function is still in development, do not use it",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "query": {"type": "string"}
+                        },
+                        "required": ["query"]
+                    }
+                }
             }
         ]
     def __set(self, tool_name: str) -> None:
@@ -129,14 +147,14 @@ class AgentToolBox:
         messages = messages[-max(10,len(messages)):]  # Keep at least the last 10 messages
         return messages
            
-    def save_memory(self, **kwargs: Any) -> Dict[str, Any]:
+    async def save_memory(self, **kwargs: Any) -> Dict[str, Any]:
         self.__set("save_memory")
 
         memory = kwargs.get("memory")
         if not memory:
             logger.error("No memory provided")
             return {"error": "No memory provided"}
-        self.db.store_memory(memory)
+        await self.memory_adapter.store_memory(content=memory)
         return {"status": "success"}
 
     async def load_memory(self, **kwargs: Any) -> Dict[str, Any]:
@@ -148,7 +166,7 @@ class AgentToolBox:
         if memories is not None:
             return {"memories": memories}
         logger.warning("No memories found in cache, checking database/Redis")
-        memories = self.db.check_memory()
+        memories = await self.memory_adapter.load_memory()
         if memories is not None:
             await self.redis.set_cache(cache_key, memories)
         return {"memories": memories}
@@ -170,3 +188,8 @@ class AgentToolBox:
             query=query.strip(),
             max_results=max_results
         )
+    async def reflect_the_memory(self, **kwargs: Any) -> Dict[str, Any]:
+        self.__set("reflect_the_memory")
+
+        query = kwargs.get("query")
+        return await self.memory.reflect_the_memory(query=query)

@@ -35,6 +35,10 @@ Potential Problems: Agetn tend to use the functions till end
 
 ### 0.1.2 Complete the backend encapsulation and the web seach tool
 
+### 0.1.3 Complete the frontend encapsulation and startup checking
+
+### 0.1.4 Realize the integration of hindsight functionality
+
 ## Some relevant technical information
 
 ### Agent Configuration:

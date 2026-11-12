@@ -12,6 +12,7 @@ services:
     depends_on:
       - redis
       - web
+      - hindsight
     volumes:
       - .:/app
       - ../logs:/logs
@@ -31,4 +32,10 @@ services:
       - "8080:8080"
     volumes:
       - ./Webcrawl/setting.yml:/etc/searxng/settings.yml:ro
+    restart: unless-stopped
+  hindsight:
+    image: ghcr.io/vectorize-io/hindsight:latest
+    container_name: lapagent-hindsight
+    ports:
+      - "8090:8090"
     restart: unless-stopped
